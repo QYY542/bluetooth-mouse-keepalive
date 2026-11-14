@@ -1,12 +1,14 @@
-# Bluetooth Mouse Keepalive 1.1
+# Bluetooth Mouse Keepalive 1.1.1
 
 macOS 菜单栏蓝牙鼠标保活工具，支持 macOS 13+，同一个 Universal 应用包含 Apple Silicon 和 Intel 版本。
 
 ## 下载
 
-下载下方 `Bluetooth-Mouse-Keepalive-1.1-macOS.zip`，完整解压后运行 `Install.command`，或将应用拖入 Applications。包内包含应用、中文 README、安装脚本和完整构建源码。SHA256 校验文件也可在下方下载。
+下载下方 `Bluetooth-Mouse-Keepalive-1.1.1-macOS.zip`，完整解压后运行 `Install.command`，或将应用拖入 Applications。包内包含应用、中文 README、安装脚本和完整构建源码。SHA256 校验文件也可在下方下载。
 
 ## 本版改进
+
+- 新增蓝色鼠标应用图标及菜单栏鼠标图标。
 
 - 英文应用名，中文菜单；“更多 → 菜单栏名称…”支持自定义中文或英文，默认“鼠标”。
 - 临时断线、连接失败自动重试，Mac 唤醒后恢复连接。

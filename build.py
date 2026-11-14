@@ -11,7 +11,7 @@ import subprocess
 import zipfile
 
 STAMP = '1114-1823'
-VERSION = '1.1'
+VERSION = '1.1.1'
 ROOT = Path(__file__).resolve().parent
 APP = 'Bluetooth Mouse Keepalive.app'
 EXECUTABLE = 'MouseKeepalive'
@@ -46,11 +46,22 @@ def main():
     executable = macos / EXECUTABLE
     run('lipo', '-create', *binaries, '-output', executable)
     executable.chmod(0o755)
+    resources = app / 'Contents' / 'Resources'
+    resources.mkdir()
+    iconset = out / 'AppIcon.iconset'
+    iconset.mkdir(exist_ok=True)
+    for logical in (16, 32, 128, 256, 512):
+        for scale in (1, 2):
+            pixels = logical * scale
+            name = f'icon_{logical}x{logical}' + ('@2x' if scale == 2 else '') + '.png'
+            subprocess.run(['sips', '-z', str(pixels), str(pixels), str(ROOT / 'Assets' / 'AppIcon.png'),
+                            '--out', str(iconset / name)], check=True, stdout=subprocess.DEVNULL)
+    run('iconutil', '-c', 'icns', iconset, '-o', resources / 'AppIcon.icns')
     info = {
         'CFBundleExecutable': EXECUTABLE, 'CFBundleIdentifier': 'local.bluetoothmouse.keepalive',
         'CFBundleName': 'Bluetooth Mouse Keepalive', 'CFBundleDisplayName': 'Bluetooth Mouse Keepalive',
-        'CFBundlePackageType': 'APPL', 'CFBundleShortVersionString': VERSION,
-        'CFBundleVersion': '202611141823', 'LSMinimumSystemVersion': '13.0', 'LSUIElement': True,
+        'CFBundlePackageType': 'APPL', 'CFBundleIconFile': 'AppIcon', 'CFBundleShortVersionString': VERSION,
+        'CFBundleVersion': '202611141838', 'LSMinimumSystemVersion': '13.0', 'LSUIElement': True,
         'NSBluetoothAlwaysUsageDescription': '读取所选蓝牙鼠标的标准设备状态，尝试减少闲置休眠。',
     }
     with (app / 'Contents' / 'Info.plist').open('wb') as f:
@@ -62,6 +73,7 @@ def main():
     run(executable, '--worker-self-test')
     for name in ['README.md', 'Install.command', 'build.py', source.name]:
         shutil.copy2(ROOT / name, package / name)
+    shutil.copytree(ROOT / 'Assets', package / 'Assets')
     (package / 'Install.command').chmod(0o755)
     (package / 'build.py').chmod(0o755)
     archive = out / f'Bluetooth-Mouse-Keepalive-{VERSION}-macOS.zip'
