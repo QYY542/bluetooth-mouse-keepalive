@@ -10,7 +10,7 @@ import Darwin
 enum Build {
     static let stamp = "1114-1823"
     static let a6Only = false
-    static let title = "蓝牙鼠标保活"
+    static let title = "Bluetooth Mouse Keepalive"
     static let label = "local.bluetoothmouse.keepalive"
     static let version = "1.1"
 }
@@ -26,6 +26,10 @@ enum Policy {
     }
     static func retryDelay(_ attempts: Int) -> TimeInterval { min(30, 2 * pow(2, Double(min(max(attempts - 1, 0), 4)))) }
     static func validInterval(_ number: Int) -> Int { [5, 10, 15].contains(number) ? number : 10 }
+    static func menuName(_ raw: String) -> String {
+        let text = raw.components(separatedBy: .controlCharacters).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.isEmpty ? "鼠标" : String(text.prefix(12))
+    }
     static func digest(_ text: String) -> String { SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined() }
 }
 func number(_ d: IOHIDDevice, _ key: String) -> Int { (IOHIDDeviceGetProperty(d, key as CFString) as? NSNumber)?.intValue ?? 0 }
@@ -174,6 +178,7 @@ final class Keepalive: NSObject, NSApplicationDelegate, NSMenuDelegate, CBCentra
     var desiredKey = UserDefaults.standard.string(forKey: "mouseKey") ?? ""
     var interval: TimeInterval = 10, nextSend = Date.distantPast, lastScan = Date.distantPast
     var paused = false, sleeping = false, blocked = false, quitting = false
+    var menuName = Policy.menuName(UserDefaults.standard.string(forKey: "menuBarName") ?? "鼠标")
     var state = "starting", message = "正在连接", errorText = ""
     var reports = 0, failures = 0, retryAttempts = 0
     var lastSuccess: Date?, timer: Timer?
@@ -208,6 +213,7 @@ final class Keepalive: NSObject, NSApplicationDelegate, NSMenuDelegate, CBCentra
         moreItem.submenu = more; menu.addItem(moreItem)
         testItem = entry("开始静置测试…", #selector(testAction)); more.addItem(testItem)
         more.addItem(entry("状态详情…", #selector(details)))
+        more.addItem(entry("菜单栏名称…", #selector(renameMenu)))
         more.addItem(entry("授权…", #selector(authorize)))
         more.addItem(entry("重新连接", #selector(retry)))
         menu.addItem(.separator()); menu.addItem(entry("退出", #selector(quit))); item.menu = menu
@@ -399,7 +405,7 @@ final class Keepalive: NSObject, NSApplicationDelegate, NSMenuDelegate, CBCentra
         let changed = self.state != state
         self.state = state; message = text; status.title = text
         let ok = state == "sending" || state == "generic_reading"
-        item?.button?.title = (Build.a6Only ? "A6 " : "鼠标 ") + (ok ? "●" : "○")
+        item?.button?.title = menuName + " " + (ok ? "●" : "○")
         item?.button?.toolTip = selected.map { "\($0.name) · \(Int(interval)) 秒\n\(text)" } ?? text
         persist(force: changed)
     }
@@ -423,6 +429,15 @@ final class Keepalive: NSObject, NSApplicationDelegate, NSMenuDelegate, CBCentra
         }
     }
     func alert(_ title: String, _ text: String) { let a = NSAlert(); a.messageText = title; a.informativeText = text; a.addButton(withTitle: "好"); NSApp.activate(ignoringOtherApps: true); a.runModal() }
+    @objc func renameMenu() {
+        let a = NSAlert(); a.messageText = "菜单栏名称"; a.informativeText = "最多 12 个字符；留空恢复为“鼠标”。只修改菜单栏文字。"
+        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24)); field.stringValue = menuName
+        a.accessoryView = field; a.addButton(withTitle: "保存"); a.addButton(withTitle: "取消")
+        a.window.initialFirstResponder = field; NSApp.activate(ignoringOtherApps: true)
+        guard a.runModal() == .alertFirstButtonReturn else { return }
+        menuName = Policy.menuName(field.stringValue); UserDefaults.standard.set(menuName, forKey: "menuBarName")
+        show(state, message)
+    }
     @objc func details() {
         let method = selected?.a6 == true ? "A6 精确匹配：标准 HID 状态报告" : "兼容尝试：只读取标准蓝牙服务"
         let success = lastSuccess.map { DateFormatter.localizedString(from: $0, dateStyle: .short, timeStyle: .medium) } ?? "尚无"
@@ -527,6 +542,9 @@ func selfTest() -> Never {
     check(!Policy.reads.contains("FF01"), "no vendor characteristics")
     check([1, 2, 3, 4, 5, 20].map(Policy.retryDelay) == [2, 4, 8, 16, 30, 30], "bounded retry")
     check(Policy.validInterval(0) == 10 && Policy.validInterval(15) == 15, "interval migration")
+    check(Policy.menuName("  ") == "鼠标", "empty menu name fallback")
+    check(Policy.menuName("A6\nMouse") == "A6 Mouse", "single-line menu name")
+    check(Policy.menuName("abcdefghijklmnop").count == 12, "menu name length")
     let a = FileLock(), b = FileLock(), key = "selftest:\(UUID().uuidString)"
     check(a.acquire(key), "first lock"); check(!b.acquire(key), "exclusive lock")
     a.release(); check(b.acquire(key), "lock release"); b.release()

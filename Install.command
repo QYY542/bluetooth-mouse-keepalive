@@ -1,7 +1,7 @@
 #!/bin/zsh
 set -euo pipefail
 package_dir="${0:A:h}"
-app_name='蓝牙鼠标保活.app'
+app_name='Bluetooth Mouse Keepalive.app'
 source_app="$package_dir/$app_name"
 target_app="$HOME/Applications/$app_name"
 fail() { print -u2 -- "$1"; read -r '?按回车关闭窗口…'; exit 1; }
