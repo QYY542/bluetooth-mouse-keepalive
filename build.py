@@ -11,7 +11,7 @@ import subprocess
 import zipfile
 
 STAMP = '1114-1823'
-VERSION = '1.1.1'
+VERSION = '1.1.2'
 ROOT = Path(__file__).resolve().parent
 APP = 'Bluetooth Mouse Keepalive.app'
 EXECUTABLE = 'MouseKeepalive'
@@ -61,7 +61,7 @@ def main():
         'CFBundleExecutable': EXECUTABLE, 'CFBundleIdentifier': 'local.bluetoothmouse.keepalive',
         'CFBundleName': 'Bluetooth Mouse Keepalive', 'CFBundleDisplayName': 'Bluetooth Mouse Keepalive',
         'CFBundlePackageType': 'APPL', 'CFBundleIconFile': 'AppIcon', 'CFBundleShortVersionString': VERSION,
-        'CFBundleVersion': '202611141838', 'LSMinimumSystemVersion': '13.0', 'LSUIElement': True,
+        'CFBundleVersion': '202611142054', 'LSMinimumSystemVersion': '13.0', 'LSUIElement': True,
         'NSBluetoothAlwaysUsageDescription': '读取所选蓝牙鼠标的标准设备状态，尝试减少闲置休眠。',
     }
     with (app / 'Contents' / 'Info.plist').open('wb') as f:

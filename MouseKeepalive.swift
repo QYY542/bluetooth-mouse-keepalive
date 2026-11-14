@@ -12,7 +12,7 @@ enum Build {
     static let a6Only = false
     static let title = "Bluetooth Mouse Keepalive"
     static let label = "local.bluetoothmouse.keepalive"
-    static let version = "1.1.1"
+    static let version = "1.1.2"
 }
 enum Policy {
     static let descriptor = "05010902a10185010901a1000509190129101500250175019510810205010930093116008026ff7f75109502810609381581257f750895018106050c0a380295018106c0c0050c0901a101850275109501150126ff0319012aff038160c005010906a1018503050719e029e71500250175019508810295017508810195057501050819012905910295017503910195067508150025e70507190029e78100c0"
@@ -203,9 +203,6 @@ final class Keepalive: NSObject, NSApplicationDelegate, NSMenuDelegate, CBCentra
         let key = Build.a6Only ? "keepaliveIntervalSeconds" : "interval"
         interval = TimeInterval(Policy.validInterval(UserDefaults.standard.integer(forKey: key)))
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        item.button?.image = NSImage(systemSymbolName: "computermouse", accessibilityDescription: Build.title)
-        item.button?.image?.isTemplate = true
-        item.button?.imagePosition = .imageLeading
         menu.delegate = self; menu.addItem(status)
         if !Build.a6Only { let e = NSMenuItem(title: "选择鼠标", action: nil, keyEquivalent: ""); e.submenu = mouseMenu; menu.addItem(e) }
         for n in [5, 10, 15] { let e = entry("\(n) 秒", #selector(changeInterval(_:))); e.tag = n; timingMenu.addItem(e) }
