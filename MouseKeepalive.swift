@@ -188,8 +188,8 @@ final class Keepalive: NSObject, NSApplicationDelegate, NSMenuDelegate, CBCentra
     var testNeedsResult = false
     var observers: [NSObjectProtocol] = []
     var support: URL { FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/" + (Build.a6Only ? "A6 Ultra" : "Bluetooth Mouse Keepalive")) }
-    var statusURL: URL { support.appendingPathComponent("status-\(Build.stamp).json") }
-    var agent: URL { FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/LaunchAgents/\(Build.label)-\(Build.stamp).plist") }
+    var statusURL: URL { support.appendingPathComponent("status.json") }
+    var agent: URL { FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/LaunchAgents/\(Build.label).plist") }
     func applicationDidFinishLaunching(_ notification: Notification) {
         let existing = NSRunningApplication.runningApplications(withBundleIdentifier: Build.label).filter { $0.processIdentifier != getpid() }
         guard existing.isEmpty else { existing.first?.activate(options: [.activateIgnoringOtherApps]); NSApp.terminate(nil); return }

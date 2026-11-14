@@ -6,7 +6,7 @@ macOS 菜单栏工具。选择一只蓝牙鼠标，设置 5 / 10 / 15 秒通信�
 
 ## 下载与安装
 
-从 GitHub Releases 下载 ZIP，完整解压后运行 `安装-1114-1823.command`。也可以把 `蓝牙鼠标保活-1114-1823.app` 拖到个人或系统 Applications 文件夹。
+从 GitHub Releases 下载 ZIP，完整解压后运行 `安装.command`。也可以把 `蓝牙鼠标保活.app` 拖到个人或系统 Applications 文件夹。
 
 1. 点击菜单栏“鼠标 ○”→“选择鼠标”，选中已连接的设备。
 2. 在“更多 → 授权…”完成系统权限设置。A6 方法需要“输入监控”，其他 BLE 鼠标的兼容读取需要“蓝牙”权限。
@@ -18,7 +18,7 @@ macOS 菜单栏工具。选择一只蓝牙鼠标，设置 5 / 10 / 15 秒通信�
 
 应用为临时签名，未经过 Apple Developer ID 签名和公证。若系统阻止打开，确认下载来源后，在“系统设置 → 隐私与安全”按系统提示处理。受管理的电脑可能不允许运行。
 
-输入监控列表找不到应用时，点击“＋”，添加安装位置中的 `蓝牙鼠标保活-1114-1823.app`，开启开关并按系统提示退出重开。更新临时签名应用后，macOS 可能要求重新授权。
+输入监控列表找不到应用时，点击“＋”，添加安装位置中的 `蓝牙鼠标保活.app`，开启开关并按系统提示退出重开。更新临时签名应用后，macOS 可能要求重新授权。
 
 ## 支持范围
 
@@ -52,21 +52,21 @@ macOS 菜单栏工具。选择一只蓝牙鼠标，设置 5 / 10 / 15 秒通信�
 没有网络上传、音频采集、鼠标移动模拟、键盘输入记录或输入事件回调。为构造 A6 标准报告，只读取当前 Caps Lock 状态；兼容读取的特征值不写日志。持续通信会增加耗电，续航变化未测量。
 
 - 设置域：`local.bluetoothmouse.keepalive`
-- 状态：`~/Library/Application Support/Bluetooth Mouse Keepalive/status-1114-1823.json`
-- 登录项：`~/Library/LaunchAgents/local.bluetoothmouse.keepalive-1114-1823.plist`
+- 状态：`~/Library/Application Support/Bluetooth Mouse Keepalive/status.json`
+- 登录项：`~/Library/LaunchAgents/local.bluetoothmouse.keepalive.plist`
 - 互斥锁：`~/Library/Application Support/Bluetooth Mouse Keepalive/Locks/`
 
-互斥锁与设置域保持稳定，以便不同版本协调；应用包内部 `Info.plist`、签名文件等采用 macOS 要求的名称。应用、压缩包、源码、安装脚本和本文档带日期时间后缀。
+应用、脚本和文档使用固定名称，下载包通过版本号区分。设置域和互斥锁在不同版本间保持稳定。
 
 ## 从源码构建
 
 需要 macOS、Python 3、Xcode Command Line Tools。无第三方依赖。
 
 ```sh
-python3 构建-1114-1823.py --output ../蓝牙鼠标保活-构建-1114-1823
+python3 构建.py --output ../蓝牙鼠标保活-构建
 ```
 
-脚本编译 arm64 与 x86_64，合并为 Universal 应用、临时签名、运行离线测试并创建 UTF-8 ZIP。原生运行测试必须在 Apple Silicon Mac 上完成；脚本根据本机架构选择执行相应切片。最低系统版本为 macOS 13。
+脚本编译 arm64 与 x86_64，合并为 Universal 应用、临时签名、运行离线测试并创建 UTF-8 ZIP。脚本使用本机架构运行 Universal 应用的测试。最低系统版本为 macOS 13。
 
 源码中的 `--self-test` 检查型号匹配、回退间隔和互斥锁；`--worker-self-test` 模拟正常通信、阻塞、意外退出和恢复，不访问鼠标。`--list-mice` 只列出系统 HID 设备元数据，不发送保活报告。
 

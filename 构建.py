@@ -13,8 +13,8 @@ import zipfile
 STAMP = '1114-1823'
 VERSION = '1.1'
 ROOT = Path(__file__).resolve().parent
-APP = f'蓝牙鼠标保活-{STAMP}.app'
-EXECUTABLE = f'MouseKeepalive-{STAMP}'
+APP = '蓝牙鼠标保活.app'
+EXECUTABLE = 'MouseKeepalive'
 
 def run(*args):
     subprocess.run([str(a) for a in args], check=True)
@@ -29,16 +29,16 @@ def main():
     args = parser.parse_args()
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=True)
-    package = out / f'蓝牙鼠标保活-{VERSION}-{STAMP}'
+    package = out / f'蓝牙鼠标保活-{VERSION}'
     if package.exists():
         raise SystemExit('输出目录已有文件，请使用一个新的输出目录。')
     app = package / APP
     macos = app / 'Contents' / 'MacOS'
     macos.mkdir(parents=True)
-    source = ROOT / f'MouseKeepalive-{STAMP}.swift'
+    source = ROOT / 'MouseKeepalive.swift'
     binaries = []
     for arch in ('arm64', 'x86_64'):
-        binary = out / f'MouseKeepalive-{arch}-{STAMP}'
+        binary = out / f'MouseKeepalive-{arch}'
         run('xcrun', 'swiftc', source, '-target', f'{arch}-apple-macos13.0',
             '-framework', 'AppKit', '-framework', 'IOKit', '-framework', 'CoreGraphics',
             '-framework', 'CoreBluetooth', '-o', binary)
@@ -60,11 +60,11 @@ def main():
     run('lipo', executable, '-verify_arch', 'arm64', 'x86_64')
     run(executable, '--self-test')
     run(executable, '--worker-self-test')
-    for name in [f'README-{STAMP}.md', f'安装-{STAMP}.command', f'构建-{STAMP}.py', source.name]:
+    for name in ['README.md', '安装.command', '构建.py', source.name]:
         shutil.copy2(ROOT / name, package / name)
-    (package / f'安装-{STAMP}.command').chmod(0o755)
-    (package / f'构建-{STAMP}.py').chmod(0o755)
-    archive = out / f'蓝牙鼠标保活-{VERSION}-macOS-{STAMP}.zip'
+    (package / '安装.command').chmod(0o755)
+    (package / '构建.py').chmod(0o755)
+    archive = out / f'蓝牙鼠标保活-{VERSION}-macOS.zip'
     with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         for path in sorted(package.rglob('*')):
             if path.is_file():
@@ -77,7 +77,7 @@ def main():
                     'app_files': manifest(app), 'architectures': ['arm64', 'x86_64'],
                     'checks': ['codesign', 'universal', 'offline_policy', 'worker_recovery', 'zip_integrity', 'utf8_names'],
                     'hardware_idle_test': 'not performed for this release'}
-    (out / f'构建校验-{STAMP}.json').write_text(json.dumps(verification, ensure_ascii=False, indent=2) + '\n')
+    (out / '构建校验.json').write_text(json.dumps(verification, ensure_ascii=False, indent=2) + '\n')
     print(archive)
 
 if __name__ == '__main__':
